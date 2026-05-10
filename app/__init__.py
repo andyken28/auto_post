@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, flash, redirect, url_for
 from config import Config
 from .extensions import db, login_manager, csrf
 from .routes import main as main_bp
@@ -18,6 +18,24 @@ def create_app(config_class=Config):
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+
+    # Warn when running with default SECRET_KEY
+    if app.config.get('SECRET_KEY', '').startswith('change-me'):
+        app.logger.warning('Using default SECRET_KEY; set SECRET_KEY env var for production')
+
+    # CSRF error handler to avoid raw 400 responses and provide useful logs
+    try:
+        from flask_wtf.csrf import CSRFError
+
+        @app.errorhandler(CSRFError)
+        def handle_csrf(e):
+            app.logger.warning('CSRF error on request %s %s: %s', request.method, request.path, getattr(e, 'description', str(e)))
+            flash_func = getattr(__import__('flask'), 'flash')
+            flash_func('Invalid or missing CSRF token. Please try again.', 'danger')
+            from flask import redirect, url_for
+            return redirect(url_for('auth.login'))
+    except Exception:
+        app.logger.debug('CSRFError handler could not be installed')
 
     # Register blueprints
     app.register_blueprint(main_bp)
