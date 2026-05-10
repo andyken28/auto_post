@@ -1,9 +1,10 @@
-from flask import Blueprint, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, request, redirect, url_for, flash, render_template, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from .extensions import db, login_manager
+from app.extensions import db, login_manager
+from app.services.auth_service import get_user_by_username, create_user
 from database.models import User
 
-auth = Blueprint("auth", __name__)
+auth = Blueprint("auth", __name__, template_folder="templates")
 
 
 @login_manager.user_loader
@@ -13,35 +14,39 @@ def load_user(user_id):
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    """Simple login endpoint for development.
+    """Render login page on GET. Handle credential POST on POST.
 
-    POST params: `username`, `password`.
-    If the user does not exist it will be created (dev convenience).
+    Supports `remember` checkbox for persistent sessions.
     """
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        if not username or not password:
-            return jsonify(error="username and password required"), 400
+        remember = bool(request.form.get("remember"))
 
-        user = User.query.filter_by(username=username).first()
+        if not username or not password:
+            flash("Username and password are required", "warning")
+            return redirect(url_for("auth.login"))
+
+        user = get_user_by_username(username)
         if not user:
-            user = User(username=username)
-            user.set_password(password)
-            db.session.add(user)
-            db.session.commit()
+            # Create user for convenience in development
+            user = create_user(username, password)
 
         if user.check_password(password):
-            login_user(user)
-            return jsonify(message="logged in", username=user.username)
-        return jsonify(error="invalid credentials"), 401
+            login_user(user, remember=remember)
+            flash("Logged in successfully", "success")
+            next_page = request.args.get("next") or url_for("main.index")
+            return redirect(next_page)
 
-    # GET -> return simple instruction
-    return jsonify(message="POST username & password to login")
+        flash("Invalid credentials", "danger")
+        return redirect(url_for("auth.login"))
+
+    return render_template("login.html")
 
 
 @auth.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return jsonify(message="logged out")
+    flash("You have been logged out", "info")
+    return redirect(url_for("main.index"))

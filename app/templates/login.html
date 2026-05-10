@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Login — AutoPost{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Admin Login</h5>
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input name="username" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input name="password" type="password" class="form-control" required />
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" name="remember" class="form-check-input" id="remember">
+            <label class="form-check-label" for="remember">Remember me</label>
+          </div>
+          <button class="btn btn-primary" type="submit">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -11,4 +11,6 @@ def health():
 
 if __name__ == "__main__":
     # Use port 8080 as requested
-    app.run(host="0.0.0.0", port=8080)
+    # Use reloader off in production; keep debug tied to config
+    debug = app.config.get("DEBUG", False)
+    app.run(host="0.0.0.0", port=8080, debug=debug)

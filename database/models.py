@@ -1,27 +1,34 @@
-from app.extensions import db
+from datetime import datetime
+
+from app.extensions import db, bcrypt
 from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class User(UserMixin, db.Model):
-    """Basic user model for authentication.
+    """User model with bcrypt password hashing and creation timestamp.
 
-    In Step 1 we keep the model minimal: `username` and `password_hash`.
-    Passwords are stored hashed using Werkzeug utilities.
+    Fields:
+    - id: primary key
+    - username: unique login name
+    - password_hash: bcrypt hashed password
+    - created_at: timestamp when user was created
     """
+
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     def set_password(self, password: str):
-        self.password_hash = generate_password_hash(password)
+        """Hash and store password using Flask-Bcrypt."""
+        self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 
     def check_password(self, password: str) -> bool:
         if not self.password_hash:
             return False
-        return check_password_hash(self.password_hash, password)
+        return bcrypt.check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f"<User {self.username}>"

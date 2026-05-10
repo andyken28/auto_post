@@ -25,5 +25,11 @@ def create_app(config_class=Config):
     # Ensure database tables exist for simple local dev
     with app.app_context():
         db.create_all()
+        # Ensure a default admin account exists for development convenience
+        try:
+            from .services.auth_service import ensure_default_admin
+            ensure_default_admin(app)
+        except Exception:
+            app.logger.exception("Failed to ensure default admin")
 
     return app
