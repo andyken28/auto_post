@@ -5,22 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Facebook Auto Post{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/css/admin.css" rel="stylesheet">
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/">AutoPost</a>
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <i class="bi bi-lightning-charge-fill me-2"></i>
+          <span>AutoPost</span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
             {% if current_user.is_authenticated %}
             <li class="nav-item">
               <a class="nav-link" href="/dashboard">Dashboard</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/auth/logout">Logout</a>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">{{ current_user.username }}</a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                <li><a class="dropdown-item" href="/dashboard">Dashboard</a></li>
+                <li><a class="dropdown-item" href="/accounts">Accounts</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+              </ul>
             </li>
             {% else %}
             <li class="nav-item">
@@ -32,9 +43,21 @@
       </div>
     </nav>
 
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-4 admin-layout">
       <div class="row">
-        <div class="col-12">
+        {% if current_user.is_authenticated %}
+        <aside class="col-md-2 sidebar">
+          <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2 me-2"></i>Overview</a></li>
+            <li class="nav-item"><a class="nav-link" href="/accounts"><i class="bi bi-people me-2"></i>Accounts</a></li>
+            <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-list-task me-2"></i>Jobs</a></li>
+            <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-journal-text me-2"></i>Logs</a></li>
+          </ul>
+        </aside>
+        <main class="col-md-10 main-content">
+        {% else %}
+        <main class="col-12 main-content">
+        {% endif %}
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, msg in messages %}
@@ -43,6 +66,11 @@
         {% endif %}
       {% endwith %}
       {% block content %}{% endblock %}
+      {% if current_user.is_authenticated %}
+        </main>
+      {% else %}
+        </main>
+      {% endif %}
       </div>
     </div>
 
