@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}AutoPost — Home{% endblock %}
+
+{% block content %}
+<div class="py-5 text-center bg-light rounded-3 mb-4">
+  <div class="container">
+    <h1 class="display-5 fw-bold">AutoPost — Facebook automation</h1>
+    <p class="lead mb-4">Schedule posts, manage accounts, and monitor automation. Lightweight MVP for local deployment.</p>
+    <div class="d-flex justify-content-center gap-2">
+      {% if current_user.is_authenticated %}
+      <a class="btn btn-primary btn-lg" href="/dashboard">Open Dashboard</a>
+      <a class="btn btn-outline-secondary btn-lg" href="/posts">Manage Posts</a>
+      {% else %}
+      <a class="btn btn-primary btn-lg" href="/auth/login">Login</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  {% if stats %}
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="card-title">Accounts</h6>
+          <div class="display-6 fw-bold">{{ stats.accounts }}</div>
+          <a href="/accounts" class="stretched-link small">View accounts</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="card-title">Posts</h6>
+          <div class="display-6 fw-bold">{{ stats.posts_total }}</div>
+          <div class="small text-muted">Pending: {{ stats.posts_pending }}</div>
+          <a href="/posts" class="stretched-link small">Manage posts</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="card-title">Logs</h6>
+          <div class="display-6 fw-bold">{{ stats.logs_count }}</div>
+          <a href="/logs" class="stretched-link small">View logs</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="card-title">Scheduler</h6>
+          <div class="display-6 fw-bold">—</div>
+          <div class="small text-muted">Background job runner</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h5 class="mb-2">Recent logs</h5>
+  <div class="list-group mb-4">
+    {% for l in stats.recent_logs %}
+      <div class="list-group-item d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fw-semibold">{{ l.action }} <small class="text-muted">{{ l.status }}</small></div>
+          <div class="small text-muted">{{ l.error_message or '' }}</div>
+        </div>
+        <div class="text-end small text-muted">{{ l.created_at }}</div>
+      </div>
+    {% else %}
+      <div class="list-group-item text-muted">No recent logs</div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-secondary">Đăng nhập để xem thống kê và quản lý.</div>
+  {% endif %}
+</div>
+{% endblock %}

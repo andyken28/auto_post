@@ -1,83 +1,116 @@
-# Facebook Auto Post — Base (Step 1)
+# AutoPost — Facebook Auto Post (MVP)
 
-Base project that runs locally with Flask + SQLite and basic auth (Flask-Login).
+This repository is a minimal production-style MVP for automated Facebook posting using Flask, Playwright and an APScheduler-based scheduler.
 
-Quick start
+## Quick start (development / local Windows)
 
-1. Create a virtual environment (recommended):
+- Create and activate a Python virtual environment (Windows PowerShell):
 
-```bash
+```powershell
 python -m venv .venv
-source .venv/Scripts/activate  # Windows: .venv\Scripts\activate
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-2. Install dependencies:
+- Install Playwright browsers (required for Playwright automation):
 
-```bash
-python -m pip install -r requirements.txt
+```powershell
+python -m playwright install
 ```
 
-3. Run the app:
+- Initialize database and run app:
 
-```bash
+```powershell
 python app.py
 ```
 
-The app listens on port `8080`. Visit http://localhost:8080
+Open http://localhost:8080 in your browser.
 
-Endpoints
+Default admin user (development): username `admin` password `nm1111` — change this in environment `ADMIN_PASS` in production.
 
-- `/` — index
-- `/health` — JSON health check
-- `/auth/login` — POST `username` & `password` to login (dev: auto-creates user)
-- `/auth/logout` — logout
+## What's included
 
-Project architecture
+- Flask app factory with Blueprints for auth, dashboard, accounts, posts, logs.
+- SQLite DB via SQLAlchemy with indexes to improve query performance.
+- Playwright-based poster that uses persistent profiles and saves error screenshots.
+- APScheduler async scheduler to dispatch scheduled posts.
+- CSRF protection (Flask-WTF) and input sanitization (bleach) on user inputs.
+- UI improvements: toasts, loading overlay, search, pagination.
+- Basic logging: rotating file handlers and DB log table.
 
-- `app/` — Flask application package (factory, blueprints, extensions)
-- `database/` — SQLAlchemy models
-- `logs/` — runtime logs (created automatically)
-- `uploads/` — uploaded files
-- `profiles/` — saved profiles (future)
-- `screenshots/` — screenshots (future)
+## BƯỚC 10 — Final optimizations & security
 
-Files created (Step 1)
+This step focuses on making the MVP production-friendly for local deployment:
 
-- `app.py` — application runner (port 8080)
-- `config.py` — configuration classes and SQLite path
-- `logger.py` — centralized logging setup
-- `requirements.txt` — dependencies
-- `README.md` — this file
+- Hardened session cookie settings (`SESSION_COOKIE_HTTPONLY`, `SESSION_COOKIE_SAMESITE`, `SESSION_COOKIE_SECURE`).
+- CSRF protection enabled through `Flask-WTF` (`CSRFProtect`).
+- Input sanitization using `bleach` for HTML fields and account names.
+- SQLite optimizations: added indexes on frequently queried columns.
+- Pagination, search and filter on the Posts and Accounts views.
+- UI helpers: toast notifications and submission loading overlay.
 
-Next steps
+## Setup Guide (Windows)
 
-- Implement posting worker and scheduler
-- Add full user/profile management UI
-- Add tests and CI
+1. Create and activate venv:
 
-# Ứng dụng Python đơn giản
-
-Hướng dẫn nhanh để chạy ứng dụng web trên cổng 8080.
-
-1. Cài phụ thuộc:
-
-```bash
-python -m pip install -r requirements.txt
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 ```
 
-2. Chạy ứng dụng:
+2. Install Playwright browsers (important):
 
-```bash
+```powershell
+python -m playwright install
+```
+
+3. Optional environment variables (for production/local hardening):
+
+- `SECRET_KEY` — set a secure random value.
+- `DATABASE_URL` — optional, e.g. `sqlite:///C:/path/to/app.db` or a Postgres URL.
+- `SESSION_COOKIE_SECURE` — set to `True` in HTTPS environments.
+- `SESSION_COOKIE_SAMESITE` — `Lax` recommended; set to `Strict` for stricter CSRF protection.
+- `ADMIN_PASS` — override default admin password.
+
+4. Start the app:
+
+```powershell
 python app.py
 ```
 
-3. Mở trình duyệt vào: http://localhost:8080
+5. Visit `http://localhost:8080`.
 
-Endpoint kiểm tra sức khỏe: http://localhost:8080/health
+## Playwright notes
 
-Default admin account (development):
+- Playwright browser binaries are not bundled: run `python -m playwright install` once per environment.
+- On Windows with headful mode, Playwright will open Chromium windows; for headless operation in automation, set `headless=True` in `PlaywrightManager.launch_persistent_context()` configuration.
 
-- **Username:** admin
-- **Password:** nm1111
+## Troubleshooting
 
-You can override these by setting environment variables `ADMIN_USER` and `ADMIN_PASS` before running the app.
+- "ModuleNotFoundError: No module named 'flask'": ensure you activated the virtualenv and installed `requirements.txt` in that environment.
+- Playwright errors: run `python -m playwright install` and ensure your Python environment can start Chromium.
+- Database locked errors (SQLite): avoid multiple processes writing simultaneously; consider switching to PostgreSQL for concurrency.
+- CSRF failures on XHR/fetch: ensure client sends the `X-CSRFToken` header. The app exposes `meta[name="csrf-token"]` in templates and sample fetch code uses it.
+
+## Security notes
+
+- Do not store production secrets in the repository. Use environment variables or a secrets manager.
+- Set `SESSION_COOKIE_SECURE=True` when serving over HTTPS.
+- Consider running the Playwright automation in a separate worker process or container with limited privileges.
+
+## Development tips
+
+- When updating models that change schema (indexes or new columns), remove the local SQLite DB `database/app.db` during development or migrate using Alembic for production.
+- Add `database/app.db`, `logs/` and `profiles/` to `.gitignore` if you do not want these artifacts committed.
+
+---
+
+If you'd like, I can:
+
+- Run a local smoke test seeding a post that triggers a screenshot/log on failure (requires Playwright install).
+- Add Alembic migrations for DB schema changes.
+- Add a small Dockerfile for local isolation on Windows.
+
+Which of those should I do next?

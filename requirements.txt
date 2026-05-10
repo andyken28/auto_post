@@ -10,3 +10,5 @@ Flask>=2.2
 Pillow>=10.0
 playwright>=1.40
 APScheduler>=3.10
+Flask-WTF>=1.1
+bleach>=6.0

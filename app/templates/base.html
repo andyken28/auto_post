@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Facebook Auto Post{% endblock %}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/static/css/admin.css" rel="stylesheet">
@@ -74,6 +75,40 @@
       </div>
     </div>
 
+    <!-- Toast container -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+      <div id="toastContainer"></div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,0.6);z-index:1200;align-items:center;justify-content:center;">
+      <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Convert flashed alerts into Bootstrap toasts
+      document.addEventListener('DOMContentLoaded', function(){
+        var messages = [];
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              messages.push({category: '{{ category }}', text: `{{ msg|escape }}`});
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        for(const m of messages){
+          const id = 't'+Math.random().toString(36).slice(2,9);
+          const tpl = `<div id="${id}" class="toast align-items-center text-bg-${m.category} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body">${m.text}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div></div>`;
+          const container = document.getElementById('toastContainer'); container.insertAdjacentHTML('beforeend', tpl);
+          const t = new bootstrap.Toast(document.getElementById(id), {delay:4000}); t.show();
+        }
+
+        // show loading overlay for forms with .needs-loading
+        document.querySelectorAll('form.needs-loading').forEach(f=>{
+          f.addEventListener('submit', ()=>{ document.getElementById('loadingOverlay').style.display='flex'; });
+        });
+      });
+    </script>
   </body>
 </html>

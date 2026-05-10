@@ -1,6 +1,6 @@
 from flask import Flask
 from config import Config
-from .extensions import db, login_manager
+from .extensions import db, login_manager, csrf
 from .routes import main as main_bp
 from .auth import auth as auth_bp
 import logger
@@ -17,6 +17,7 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     # Register blueprints
     app.register_blueprint(main_bp)
@@ -33,6 +34,12 @@ def create_app(config_class=Config):
         app.register_blueprint(facebook_bp)
     except Exception:
         app.logger.exception("Failed to register facebook accounts blueprint")
+    # Logs viewer blueprint
+    try:
+        from .logs import logs_bp as logs_blueprint
+        app.register_blueprint(logs_blueprint)
+    except Exception:
+        app.logger.exception("Failed to register logs blueprint")
     # Posts blueprint
     try:
         from .posts import posts_bp as posts_blueprint

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Logs — AutoPost{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h3 class="m-0">Logs</h3>
+  <form class="d-flex" method="get">
+    <input name="q" class="form-control me-2" placeholder="search error message" value="{{ filters.q or '' }}">
+    <input name="action" class="form-control me-2" placeholder="action" value="{{ filters.action or '' }}">
+    <select name="status" class="form-select me-2">
+      <option value="">All</option>
+      <option value="success" {% if filters.status=='success' %}selected{% endif %}>Success</option>
+      <option value="failed" {% if filters.status=='failed' %}selected{% endif %}>Failed</option>
+      <option value="error" {% if filters.status=='error' %}selected{% endif %}>Error</option>
+    </select>
+    <button class="btn btn-outline-secondary">Filter</button>
+  </form>
+</div>
+
+<div class="table-responsive">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Action</th>
+      <th>Status</th>
+      <th>Account</th>
+      <th>Error</th>
+      <th>Screenshot</th>
+      <th>When</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for l in logs %}
+    <tr>
+      <td>{{ l.id }}</td>
+      <td>{{ l.action }}</td>
+      <td>{{ l.status }}</td>
+      <td>{{ l.account.account_name if l.account else '-' }}</td>
+      <td style="max-width:300px">{{ l.error_message or '-' }}</td>
+      <td>{% if l.screenshot_path %}<a href="/{{ l.screenshot_path }}" target="_blank">View</a>{% else %}-{% endif %}</td>
+      <td>{{ l.created_at }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="text-center">No logs</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% endblock %}

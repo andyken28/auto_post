@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Local DB and runtime artifacts
+/database/app.db
+/logs/
+/uploads/
+/profiles/
+/screenshots/
+.env
+.env.*
+
+# VSCode
+.vscode/

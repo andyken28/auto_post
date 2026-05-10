@@ -56,13 +56,16 @@
 <script>
 function deleteAccount(id){
   if(!confirm('Delete account?')) return;
-  fetch(`/accounts/${id}/delete`,{method:'POST'}).then(r=>r.json()).then(j=>{location.reload()})
+  const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  fetch(`/accounts/${id}/delete`,{method:'POST', headers:{'X-CSRFToken': token}}).then(r=>r.json()).then(j=>{location.reload()})
 }
 function testProxy(id){
-  fetch(`/accounts/${id}/test-proxy`).then(r=>r.json()).then(j=>alert('Proxy OK: '+j.ok))
+  const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  fetch(`/accounts/${id}/test-proxy`,{headers:{'X-CSRFToken': token}}).then(r=>r.json()).then(j=>alert('Proxy OK: '+j.ok))
 }
 function testLogin(id){
-  fetch(`/accounts/${id}/test-login`).then(r=>r.json()).then(j=>alert('Login OK: '+j.ok))
+  const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  fetch(`/accounts/${id}/test-login`,{headers:{'X-CSRFToken': token}}).then(r=>r.json()).then(j=>alert('Login OK: '+j.ok))
 }
 
 var accountModal = document.getElementById('accountModal')

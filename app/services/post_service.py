@@ -2,14 +2,30 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import current_app
+import bleach
+from sqlalchemy.orm import joinedload
 
 from app.extensions import db
 from database.models import Post
 from app.utils.images import validate_image_file, save_image_file
 
 
-def list_posts():
-    return Post.query.order_by(Post.created_at.desc()).all()
+def list_posts(page: int = 1, per_page: int = 20, q: str = None, account_id: int = None, status: str = None):
+    """Return paginated posts with optional search and filters.
+
+    Returns a dict: {items, total, page, per_page}
+    """
+    query = Post.query.options(joinedload(Post.account))
+    if q:
+        query = query.filter(Post.content.ilike(f"%{q}%") | Post.title.ilike(f"%{q}%"))
+    if account_id:
+        query = query.filter(Post.account_id == account_id)
+    if status:
+        query = query.filter(Post.status == status)
+
+    total = query.with_entities(db.func.count(Post.id)).scalar() or 0
+    items = query.order_by(Post.created_at.desc()).offset((page - 1) * per_page).limit(per_page).all()
+    return {"items": items, "total": total, "page": page, "per_page": per_page}
 
 
 def get_post(post_id: int):
@@ -17,11 +33,25 @@ def get_post(post_id: int):
 
 
 def create_post(data: dict, file_storage=None):
+    # sanitize HTML content
+    content = data.get('content') or ''
+    allowed_tags = ['b', 'i', 'u', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li']
+    allowed_attrs = {'a': ['href', 'title', 'rel', 'target']}
+    clean_content = bleach.clean(content, tags=allowed_tags, attributes=allowed_attrs, strip=True)
+
+    scheduled = data.get('scheduled_time')
+    sched_dt = None
+    if scheduled:
+        try:
+            sched_dt = datetime.fromisoformat(scheduled)
+        except Exception:
+            sched_dt = None
+
     post = Post(
         title=data.get('title'),
-        content=data.get('content'),
-        scheduled_time=data.get('scheduled_time'),
-        account_id=data.get('account_id'),
+        content=clean_content,
+        scheduled_time=sched_dt,
+        account_id=(int(data.get('account_id')) if data.get('account_id') else None),
         status=data.get('status') or 'pending'
     )
 
@@ -42,9 +72,16 @@ def create_post(data: dict, file_storage=None):
 
 def update_post(post: Post, data: dict, file_storage=None):
     post.title = data.get('title') or post.title
-    post.content = data.get('content') or post.content
-    post.scheduled_time = data.get('scheduled_time') or post.scheduled_time
-    post.account_id = data.get('account_id') or post.account_id
+    if 'content' in data:
+        clean_content = bleach.clean(data.get('content') or '', tags=['b', 'i', 'u', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li'], attributes={'a': ['href', 'title', 'rel', 'target']}, strip=True)
+        post.content = clean_content
+    if 'scheduled_time' in data and data.get('scheduled_time'):
+        try:
+            post.scheduled_time = datetime.fromisoformat(data.get('scheduled_time'))
+        except Exception:
+            pass
+    if 'account_id' in data and data.get('account_id'):
+        post.account_id = int(data.get('account_id'))
     if file_storage:
         filename = secure_filename(file_storage.filename)
         if validate_image_file(file_storage.stream, filename):

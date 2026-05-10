@@ -33,3 +33,12 @@ def setup_logging(config):
         "%(asctime)s %(levelname)s [%(name)s] %(message)s"
     ))
     root.addHandler(file_handler)
+
+    # Separate error log file
+    error_path = os.path.join(log_dir, "error.log")
+    error_handler = RotatingFileHandler(error_path, maxBytes=5 * 1024 * 1024, backupCount=3)
+    error_handler.setLevel(logging.ERROR)
+    error_handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+    ))
+    root.addHandler(error_handler)

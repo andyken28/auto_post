@@ -6,6 +6,7 @@ from datetime import datetime
 from app.playwright_manager import PlaywrightManager
 from app.screenshot import save_page_screenshot
 from app.utils.encryption import decrypt_text
+from app.services.log_service import log_action
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +95,12 @@ class FacebookPoster:
                             await file_input.set_input_files(image_path)
                     except Exception as e:
                         logger.exception('Image upload failed: %s', e)
-                        await save_page_screenshot(page, prefix=f'upload-error-{account.account_name}')
+                        path = await save_page_screenshot(page, prefix=f'upload-error-{account.account_name}')
+                        # log to DB
+                        try:
+                            log_action('upload_image', 'error', account_id=getattr(account, 'id', None), error_message=str(e), screenshot_path=path)
+                        except Exception:
+                            logger.exception('Failed to log upload error')
                         raise
 
                 # Submit post - try common post buttons
@@ -108,7 +114,11 @@ class FacebookPoster:
                         await page.keyboard.press('Enter')
                 except Exception as e:
                     logger.exception('Failed to submit post: %s', e)
-                    await save_page_screenshot(page, prefix=f'submit-error-{account.account_name}')
+                    path = await save_page_screenshot(page, prefix=f'submit-error-{account.account_name}')
+                    try:
+                        log_action('submit_post', 'error', account_id=getattr(account, 'id', None), error_message=str(e), screenshot_path=path)
+                    except Exception:
+                        logger.exception('Failed to log submit error')
                     raise
 
                 # verification: look for success indicators or absence of error messages
@@ -118,15 +128,20 @@ class FacebookPoster:
                     # Return True for now; a more robust check can be implemented
                     return True
                 except Exception:
-                    await save_page_screenshot(page, prefix=f'verify-error-{account.account_name}')
+                    path = await save_page_screenshot(page, prefix=f'verify-error-{account.account_name}')
+                    try:
+                        log_action('verify_post', 'failed', account_id=getattr(account, 'id', None), error_message='verify failed', screenshot_path=path)
+                    except Exception:
+                        logger.exception('Failed to log verify failure')
                     return False
 
             except Exception as exc:
                 logger.exception('Posting failed for %s: %s', account.account_name, exc)
                 try:
-                    await save_page_screenshot(page, prefix=f'error-{account.account_name}')
+                    path = await save_page_screenshot(page, prefix=f'error-{account.account_name}')
+                    log_action('post', 'error', account_id=getattr(account, 'id', None), error_message=str(exc), screenshot_path=path)
                 except Exception:
-                    logger.exception('Failed saving screenshot on error')
+                    logger.exception('Failed saving screenshot or logging on error')
                 return False
             finally:
                 try:

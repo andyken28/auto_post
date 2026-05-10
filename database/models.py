@@ -52,6 +52,11 @@ class Post(db.Model):
     status = db.Column(db.String(32), default="pending", nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+    __table_args__ = (
+        db.Index('ix_posts_created_at', 'created_at'),
+        db.Index('ix_posts_account_status', 'account_id', 'status'),
+    )
+
     account = db.relationship('FacebookAccount', backref='posts')
 
     def __repr__(self):
@@ -79,12 +84,22 @@ class Log(db.Model):
     __tablename__ = "logs"
 
     id = db.Column(db.Integer, primary_key=True)
-    level = db.Column(db.String(32), nullable=False)
-    message = db.Column(db.Text, nullable=False)
+    action = db.Column(db.String(150), nullable=False)
+    status = db.Column(db.String(32), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey('facebook_accounts.id'), nullable=True)
+    error_message = db.Column(db.Text, nullable=True)
+    screenshot_path = db.Column(db.String(400), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+    __table_args__ = (
+        db.Index('ix_logs_created_at', 'created_at'),
+        db.Index('ix_logs_account', 'account_id'),
+    )
+
+    account = db.relationship('FacebookAccount', backref='logs')
+
     def __repr__(self):
-        return f"<Log {self.level} {self.created_at}>"
+        return f"<Log {self.action} {self.status} @ {self.created_at}>"
 
 
 class FacebookAccount(db.Model):
@@ -104,6 +119,10 @@ class FacebookAccount(db.Model):
     status = db.Column(db.String(32), default="active", nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        db.Index('ix_facebook_account_name', 'account_name'),
+    )
 
     def set_encrypted_cookie(self, raw_cookie: str, encrypt_fn):
         """Encrypt and set cookie using provided encrypt function."""

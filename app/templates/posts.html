@@ -8,6 +8,12 @@
   <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal">New Post</button>
 </div>
 
+<form class="row g-2 mb-3" method="get" action="/posts">
+  <div class="col-auto"><input name="q" value="{{ q or '' }}" class="form-control" placeholder="Search posts"></div>
+  <div class="col-auto"><select name="account_id" class="form-select"><option value="">All accounts</option>{% for a in accounts %}<option value="{{ a.id }}">{{ a.account_name }}</option>{% endfor %}</select></div>
+  <div class="col-auto"><button class="btn btn-outline-secondary">Search</button></div>
+</form>
+
 <div class="table-responsive">
 <table class="table table-hover align-middle">
   <thead>
@@ -22,7 +28,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for p in posts %}
+    {% for p in posts.items %}
     <tr>
       <td>{{ p.id }}</td>
       <td style="max-width:320px">{{ p.content }}</td>
@@ -32,8 +38,8 @@
       <td><span class="badge bg-{{ 'success' if p.status=='success' else ('warning' if p.status=='running' else 'secondary') }}">{{ p.status }}</span></td>
       <td>
         <a class="btn btn-sm btn-outline-primary me-1" href="/posts/{{ p.id }}/preview" data-bs-toggle="modal" data-bs-target="#previewModal">Preview</a>
-        <form class="d-inline" method="post" action="/posts/{{ p.id }}/duplicate"><button class="btn btn-sm btn-outline-secondary">Duplicate</button></form>
-        <form class="d-inline" method="post" action="/posts/{{ p.id }}/retry"><button class="btn btn-sm btn-outline-success">Retry</button></form>
+        <form class="d-inline needs-loading" method="post" action="/posts/{{ p.id }}/duplicate"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-secondary">Duplicate</button></form>
+        <form class="d-inline needs-loading" method="post" action="/posts/{{ p.id }}/retry"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-success">Retry</button></form>
         <button class="btn btn-sm btn-danger" onclick="deletePost({{ p.id }})">Delete</button>
       </td>
     </tr>
@@ -44,11 +50,22 @@
 </table>
 </div>
 
+{% if posts.total > posts.per_page %}
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% set last = (posts.total // posts.per_page) + (1 if posts.total % posts.per_page else 0) %}
+    {% for pg in range(1, last+1) %}
+      <li class="page-item {{ 'active' if pg==posts.page else '' }}"><a class="page-link" href="?page={{ pg }}">{{ pg }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}
+
 {% include 'post_modal.html' %}
 {% include 'post_preview.html' %}
 
 <script>
-function deletePost(id){ if(!confirm('Delete post?')) return; fetch(`/posts/${id}/delete`,{method:'POST'}).then(r=>r.json()).then(()=>location.reload()) }
+function deletePost(id){ if(!confirm('Delete post?')) return; const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); fetch(`/posts/${id}/delete`,{method:'POST', headers:{'X-CSRFToken': token}}).then(r=>r.json()).then(()=>location.reload()) }
 // load preview content into modal via fetch
 var previewModal = document.getElementById('previewModal')
 previewModal.addEventListener('show.bs.modal', function (event) {

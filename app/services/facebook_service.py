@@ -5,6 +5,7 @@ from app.extensions import db
 from database.models import FacebookAccount
 from app.utils.encryption import encrypt_text, decrypt_text
 from app.utils.validators import validate_proxy
+import bleach
 
 
 def list_accounts(search: Optional[str] = None):
@@ -20,10 +21,15 @@ def get_account(account_id: int) -> Optional[FacebookAccount]:
 
 
 def create_account(data: Dict[str, Any]) -> FacebookAccount:
+    # sanitize user provided strings
+    name = bleach.clean((data.get("account_name") or '').strip(), tags=[], strip=True)
+    proxy = (data.get("proxy") or '').strip()
+    ua = bleach.clean((data.get("user_agent") or '').strip(), tags=[], strip=True)
+
     acc = FacebookAccount(
-        account_name=data.get("account_name"),
-        proxy=data.get("proxy"),
-        user_agent=data.get("user_agent"),
+        account_name=name,
+        proxy=proxy or None,
+        user_agent=ua or None,
         status=data.get("status") or "active",
     )
     raw_cookie = data.get("cookie_json")
@@ -36,9 +42,12 @@ def create_account(data: Dict[str, Any]) -> FacebookAccount:
 
 
 def update_account(account: FacebookAccount, data: Dict[str, Any]) -> FacebookAccount:
-    account.account_name = data.get("account_name") or account.account_name
-    account.proxy = data.get("proxy")
-    account.user_agent = data.get("user_agent")
+    if 'account_name' in data:
+        account.account_name = bleach.clean((data.get("account_name") or '').strip(), tags=[], strip=True) or account.account_name
+    if 'proxy' in data:
+        account.proxy = (data.get("proxy") or '').strip() or None
+    if 'user_agent' in data:
+        account.user_agent = bleach.clean((data.get("user_agent") or '').strip(), tags=[], strip=True) or account.user_agent
     account.status = data.get("status") or account.status
     raw_cookie = data.get("cookie_json")
     if raw_cookie is not None:

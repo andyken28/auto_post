@@ -11,9 +11,19 @@ posts_bp = Blueprint('posts', __name__, template_folder='templates')
 @posts_bp.route('/posts')
 @login_required
 def posts_list():
-    posts = list_posts()
+    # pagination and filtering
+    try:
+        page = int(request.args.get('page', 1))
+    except Exception:
+        page = 1
+    per_page = int(request.args.get('per_page', 20))
+    q = request.args.get('q')
+    account_id = request.args.get('account_id') or None
+    status = request.args.get('status') or None
+
+    posts = list_posts(page=page, per_page=per_page, q=q, account_id=account_id, status=status)
     accounts = list_accounts()
-    return render_template('posts.html', posts=posts, accounts=accounts)
+    return render_template('posts.html', posts=posts, accounts=accounts, q=q)
 
 
 @posts_bp.route('/posts/create', methods=['POST'])
