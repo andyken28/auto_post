@@ -21,6 +21,12 @@ def create_app(config_class=Config):
     # Register blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    # Dashboard admin blueprint
+    try:
+        from .dashboard import dashboard as dashboard_bp
+        app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
+    except Exception:
+        app.logger.exception("Failed to register dashboard blueprint")
 
     # Ensure database tables exist for simple local dev
     with app.app_context():

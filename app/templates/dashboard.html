@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — AutoPost{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-3">
+    <div class="list-group">
+      <a href="/dashboard" class="list-group-item list-group-item-action active">Overview</a>
+      <a href="#" class="list-group-item list-group-item-action">Accounts</a>
+      <a href="#" class="list-group-item list-group-item-action">Posts</a>
+      <a href="#" class="list-group-item list-group-item-action">Jobs</a>
+      <a href="#" class="list-group-item list-group-item-action">Logs</a>
+    </div>
+  </div>
+
+  <div class="col-md-9">
+    <div class="row mb-3">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card text-white bg-primary mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Accounts</h5>
+            <p class="card-text fs-4">{{ stats.total_accounts }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Total Posts</h5>
+            <p class="card-text fs-4">{{ stats.total_posts }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Success</h5>
+            <p class="card-text fs-4">{{ stats.posts_success }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card text-white bg-danger mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Failed</h5>
+            <p class="card-text fs-4">{{ stats.posts_failed }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Jobs Running</div>
+          <div class="card-body">
+            <h3>{{ stats.jobs_running }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Recent Logs</div>
+          <div class="card-body">
+            <ul class="list-group">
+              {% for l in stats.recent_logs %}
+                <li class="list-group-item"><strong>{{ l.level }}</strong> — {{ l.message }} <br><small class="text-muted">{{ l.created_at }}</small></li>
+              {% else %}
+                <li class="list-group-item">No logs</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
