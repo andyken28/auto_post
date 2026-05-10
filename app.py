@@ -1,27 +1,14 @@
-from flask import Flask, render_template_string, jsonify
-
-app = Flask(__name__)
-
-INDEX_HTML = """<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Ứng dụng Python đơn giản</title></head>
-<body>
-<h1>Ứng dụng Python đơn giản</h1>
-<p>Chạy trên cổng 8080</p>
-</body>
-</html>
-"""
+from app import create_app
 
 
-@app.route("/")
-def index():
-    return render_template_string(INDEX_HTML)
+app = create_app()
 
 
 @app.route("/health")
 def health():
-    return jsonify(status="ok")
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":
+    # Use port 8080 as requested
     app.run(host="0.0.0.0", port=8080)
