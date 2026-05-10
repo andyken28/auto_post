@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Accounts — AutoPost{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h3>Facebook Accounts</h3>
+  <div>
+    <form class="d-inline" method="get" action="{{ url_for('facebook_accounts.accounts_list') }}">
+      <input name="q" value="{{ q or '' }}" class="form-control d-inline-block" style="width:220px" placeholder="search">
+      <button class="btn btn-outline-secondary ms-1">Search</button>
+    </form>
+    <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#accountModal">Add Account</button>
+  </div>
+</div>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Proxy</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in accounts %}
+    <tr>
+      <td>{{ a.id }}</td>
+      <td>{{ a.account_name }}</td>
+      <td>{{ a.proxy or '-' }}</td>
+      <td>{{ a.status }}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#accountModal" data-id="{{ a.id }}" data-name="{{ a.account_name }}" data-proxy="{{ a.proxy }}" data-ua="{{ a.user_agent }}" data-status="{{ a.status }}">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteAccount({{ a.id }})">Delete</button>
+        <button class="btn btn-sm btn-info" onclick="testProxy({{ a.id }})">Test Proxy</button>
+        <button class="btn btn-sm btn-success" onclick="testLogin({{ a.id }})">Test Login</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">No accounts</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% include 'account_modal.html' %}
+
+<script>
+function deleteAccount(id){
+  if(!confirm('Delete account?')) return;
+  fetch(`/accounts/${id}/delete`,{method:'POST'}).then(r=>r.json()).then(j=>{location.reload()})
+}
+function testProxy(id){
+  fetch(`/accounts/${id}/test-proxy`).then(r=>r.json()).then(j=>alert('Proxy OK: '+j.ok))
+}
+function testLogin(id){
+  fetch(`/accounts/${id}/test-login`).then(r=>r.json()).then(j=>alert('Login OK: '+j.ok))
+}
+
+var accountModal = document.getElementById('accountModal')
+accountModal.addEventListener('show.bs.modal', function (event) {
+  var button = event.relatedTarget
+  var id = button.getAttribute('data-id')
+  if(id){
+    document.getElementById('accForm').action = `/accounts/${id}/edit`
+    document.getElementById('account_name').value = button.getAttribute('data-name')
+    document.getElementById('proxy').value = button.getAttribute('data-proxy')
+    document.getElementById('user_agent').value = button.getAttribute('data-ua')
+    document.getElementById('status').value = button.getAttribute('data-status')
+  } else {
+    document.getElementById('accForm').action = `/accounts/create`
+    document.getElementById('account_name').value = ''
+    document.getElementById('proxy').value = ''
+    document.getElementById('user_agent').value = ''
+    document.getElementById('status').value = 'active'
+  }
+})
+</script>
+
+{% endblock %}

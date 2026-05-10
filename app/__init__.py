@@ -27,6 +27,12 @@ def create_app(config_class=Config):
         app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
     except Exception:
         app.logger.exception("Failed to register dashboard blueprint")
+    # Facebook accounts blueprint
+    try:
+        from .facebook_accounts import fb as facebook_bp
+        app.register_blueprint(facebook_bp)
+    except Exception:
+        app.logger.exception("Failed to register facebook accounts blueprint")
 
     # Ensure database tables exist for simple local dev
     with app.app_context():

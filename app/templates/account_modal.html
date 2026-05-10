@@ -1,0 +1,41 @@
+<div class="modal fade" id="accountModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="accForm" method="post">
+        <div class="modal-header">
+          <h5 class="modal-title">Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Account name</label>
+            <input id="account_name" name="account_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cookie (raw cookie string)</label>
+            <textarea name="cookie_json" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Proxy</label>
+            <input id="proxy" name="proxy" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">User agent</label>
+            <input id="user_agent" name="user_agent" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select id="status" name="status" class="form-select">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-primary" type="submit">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
