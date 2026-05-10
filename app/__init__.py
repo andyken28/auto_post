@@ -49,5 +49,11 @@ def create_app(config_class=Config):
             ensure_default_admin(app)
         except Exception:
             app.logger.exception("Failed to ensure default admin")
+        # Start scheduler for processing scheduled posts
+        try:
+            from .scheduler_service import start_scheduler
+            start_scheduler(app)
+        except Exception:
+            app.logger.exception("Failed to start scheduler")
 
     return app
