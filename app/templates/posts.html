@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Posts — AutoPost{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h3 class="m-0">Posts</h3>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal">New Post</button>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Content</th>
+      <th>Image</th>
+      <th>Account</th>
+      <th>Scheduled</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in posts %}
+    <tr>
+      <td>{{ p.id }}</td>
+      <td style="max-width:320px">{{ p.content }}</td>
+      <td>{% if p.image_path %}<img src="/{{ p.image_path }}" style="max-height:60px">{% else %}-{% endif %}</td>
+      <td>{{ p.account.account_name if p.account else '-' }}</td>
+      <td>{{ p.scheduled_time or '-' }}</td>
+      <td><span class="badge bg-{{ 'success' if p.status=='success' else ('warning' if p.status=='running' else 'secondary') }}">{{ p.status }}</span></td>
+      <td>
+        <a class="btn btn-sm btn-outline-primary me-1" href="/posts/{{ p.id }}/preview" data-bs-toggle="modal" data-bs-target="#previewModal">Preview</a>
+        <form class="d-inline" method="post" action="/posts/{{ p.id }}/duplicate"><button class="btn btn-sm btn-outline-secondary">Duplicate</button></form>
+        <form class="d-inline" method="post" action="/posts/{{ p.id }}/retry"><button class="btn btn-sm btn-outline-success">Retry</button></form>
+        <button class="btn btn-sm btn-danger" onclick="deletePost({{ p.id }})">Delete</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="text-center">No posts</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% include 'post_modal.html' %}
+{% include 'post_preview.html' %}
+
+<script>
+function deletePost(id){ if(!confirm('Delete post?')) return; fetch(`/posts/${id}/delete`,{method:'POST'}).then(r=>r.json()).then(()=>location.reload()) }
+// load preview content into modal via fetch
+var previewModal = document.getElementById('previewModal')
+previewModal.addEventListener('show.bs.modal', function (event) {
+  var button = event.relatedTarget
+  var href = button.getAttribute('href')
+  fetch(href).then(r=>r.text()).then(html=>{ previewModal.querySelector('.modal-body').innerHTML = html })
+})
+</script>
+
+{% endblock %}

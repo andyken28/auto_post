@@ -33,6 +33,12 @@ def create_app(config_class=Config):
         app.register_blueprint(facebook_bp)
     except Exception:
         app.logger.exception("Failed to register facebook accounts blueprint")
+    # Posts blueprint
+    try:
+        from .posts import posts_bp as posts_blueprint
+        app.register_blueprint(posts_blueprint)
+    except Exception:
+        app.logger.exception("Failed to register posts blueprint")
 
     # Ensure database tables exist for simple local dev
     with app.app_context():

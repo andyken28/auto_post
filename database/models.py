@@ -45,8 +45,14 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(250), nullable=True)
     content = db.Column(db.Text, nullable=True)
+    image_path = db.Column(db.String(400), nullable=True)
+    scheduled_time = db.Column(db.DateTime, nullable=True)
+    account_id = db.Column(db.Integer, db.ForeignKey('facebook_accounts.id'), nullable=True)
+    retry_count = db.Column(db.Integer, default=0, nullable=False)
     status = db.Column(db.String(32), default="pending", nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    account = db.relationship('FacebookAccount', backref='posts')
 
     def __repr__(self):
         return f"<Post {self.id} {self.status}>"

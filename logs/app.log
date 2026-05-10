@@ -1,0 +1,19 @@
+2026-05-10 20:50:47,048 INFO [app] Creating default admin user: admin
+2026-05-10 20:50:48,596 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.1.11:8080
+2026-05-10 20:50:48,596 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2026-05-10 20:51:56,556 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:51:56] "GET / HTTP/1.1" 200 -
+2026-05-10 20:51:56,751 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:51:56] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-10 20:51:59,112 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:51:59] "GET /auth/login HTTP/1.1" 200 -
+2026-05-10 20:51:59,148 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:51:59] "[33mGET /static/css/admin.css HTTP/1.1[0m" 404 -
+2026-05-10 20:52:03,555 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:52:03] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+2026-05-10 20:52:03,567 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:52:03] "GET / HTTP/1.1" 200 -
+2026-05-10 20:53:07,671 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:53:07] "[32mGET /auth/logout HTTP/1.1[0m" 302 -
+2026-05-10 20:53:07,685 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:53:07] "GET / HTTP/1.1" 200 -
+2026-05-10 20:53:09,200 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:53:09] "[32mGET /admin HTTP/1.1[0m" 302 -
+2026-05-10 20:53:09,208 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:53:09] "GET /auth/login?next=/admin HTTP/1.1" 200 -
+2026-05-10 20:53:09,254 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:53:09] "[33mGET /static/css/admin.css HTTP/1.1[0m" 404 -
+2026-05-10 20:53:14,837 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:53:14] "[32mPOST /auth/login?next=/admin HTTP/1.1[0m" 302 -
+2026-05-10 20:53:14,845 INFO [werkzeug] 127.0.0.1 - - [10/May/2026 20:53:14] "GET /admin HTTP/1.1" 200 -

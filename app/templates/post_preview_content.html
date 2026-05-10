@@ -1,0 +1,7 @@
+<div>
+  <p>{{ post.content }}</p>
+  {% if post.image_path %}
+  <img src="/{{ post.image_path }}" class="img-fluid" alt="preview">
+  {% endif %}
+  <p class="text-muted small">Scheduled: {{ post.scheduled_time or '—' }}</p>
+</div>

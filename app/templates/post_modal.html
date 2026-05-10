@@ -1,0 +1,41 @@
+<div class="modal fade" id="postModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="post" action="/posts/create" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title">New Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Content</label>
+            <textarea name="content" class="form-control" rows="4" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Image</label>
+            <input name="image" type="file" accept="image/*" class="form-control">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Schedule (optional)</label>
+              <input name="scheduled_time" type="datetime-local" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Account</label>
+              <select name="account_id" class="form-select">
+                <option value="">-- none --</option>
+                {% for a in accounts %}
+                <option value="{{ a.id }}">{{ a.account_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-primary" type="submit">Save Post</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
