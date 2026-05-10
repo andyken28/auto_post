@@ -74,3 +74,10 @@ python app.py
 3. Mở trình duyệt vào: http://localhost:8080
 
 Endpoint kiểm tra sức khỏe: http://localhost:8080/health
+
+Default admin account (development):
+
+- **Username:** admin
+- **Password:** nm1111
+
+You can override these by setting environment variables `ADMIN_USER` and `ADMIN_PASS` before running the app.

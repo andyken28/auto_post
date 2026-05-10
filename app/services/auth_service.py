@@ -29,7 +29,8 @@ def ensure_default_admin(app=None):
         app = current_app
 
     admin_user = os.environ.get("ADMIN_USER", "admin")
-    admin_pass = os.environ.get("ADMIN_PASS", "admin")
+    # Default admin password for local dev
+    admin_pass = os.environ.get("ADMIN_PASS", "nm1111")
 
     with app.app_context():
         if not User.query.filter_by(username=admin_user).first():
